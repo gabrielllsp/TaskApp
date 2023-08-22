@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.gabriel.taskapp.R
 import com.gabriel.taskapp.databinding.FragmentLoginBinding
+import com.gabriel.taskapp.util.showBottomSheet
 
 
 class LoginFragment : Fragment() {
@@ -27,11 +29,10 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initListeners()
     }
-
     private fun initListeners(){
 
         binding.btnLogin.setOnClickListener {
-            findNavController().navigate(R.id.action_global_homeFragment)
+            validate()
         }
 
         binding.btnRegister.setOnClickListener {
@@ -40,6 +41,20 @@ class LoginFragment : Fragment() {
 
         binding.btnRecover.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_recoverAccountFragment)
+        }
+    }
+    private fun validate(){
+        val email = binding.edtEmail.text.toString().trim()
+        val password = binding.edtPassword.text.toString().trim()
+
+        if (email.isNotEmpty()){
+            if (password.isNotEmpty()){
+                findNavController().navigate(R.id.action_global_homeFragment)
+            }else{
+                showBottomSheet(message = R.string.password_empty)
+            }
+        }else{
+            showBottomSheet(message = R.string.email_empty)
         }
     }
     override fun onDestroy() {
