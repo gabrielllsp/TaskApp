@@ -7,101 +7,96 @@
     android:fillViewport="true"
     tools:context=".ui.auth.RegisterFragment">
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-       <com.google.android.material.appbar.AppBarLayout
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content">
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-           <com.google.android.material.appbar.MaterialToolbar
-               android:id="@+id/toolbar"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:background="@color/color_default"
-               app:navigationIcon="@drawable/ic_back">
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/color_default"
+                app:navigationIcon="@drawable/ic_back">
 
-               <TextView
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:text="Criar conta"
-                   android:textColor="@color/white"
-                   android:layout_gravity="center"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Criar conta"
+                    android:textColor="@color/white" />
 
-           </com.google.android.material.appbar.MaterialToolbar>
+            </com.google.android.material.appbar.MaterialToolbar>
 
-       </com.google.android.material.appbar.AppBarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
-       <LinearLayout
-           android:id="@+id/linearLayout"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:layout_marginHorizontal="16dp"
-           android:orientation="vertical"
-           app:layout_constraintEnd_toEndOf="parent"
-           app:layout_constraintHorizontal_bias="1.0"
-           app:layout_constraintStart_toStartOf="parent"
-           tools:layout_editor_absoluteY="144dp">
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="144dp">
 
-           <TextView
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:text="Email"
-               android:textColor="@color/white" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="@color/white" />
 
-           <EditText
-               android:id="@+id/edtEmail"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:layout_marginTop="4dp"
-               android:background="@drawable/bg_edit_text"
-               android:hint="Digite seu e-mail"
-               android:inputType="textEmailAddress"
-               android:padding="16dp" />
+            <EditText
+                android:id="@+id/edtEmail"
+                style="@style/EditTextTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="Digite seu e-mail"
+                android:inputType="textEmailAddress" />
 
-           <TextView
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_marginTop="16dp"
-               android:text="Senha"
-               android:textColor="@color/white" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Senha"
+                android:textColor="@color/white" />
 
-           <EditText
-               android:id="@+id/edtPassword"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:layout_marginTop="4dp"
-               android:background="@drawable/bg_edit_text"
-               android:hint="Digite sua senha"
-               android:inputType="textPassword"
-               android:padding="16dp" />
+            <EditText
+                android:id="@+id/edtPassword"
+                style="@style/EditTextTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="Digite sua senha"
+                android:inputType="textPassword" />
 
-           <com.google.android.material.button.MaterialButton
-               android:id="@+id/btnRegister"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:layout_marginTop="16dp"
-               android:background="@drawable/bg_btn"
-               android:text="CRIAR CONTA"
-               android:textColor="@color/color_default"
-               app:backgroundTint="@null" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegister"
+                style="@style/ButtonTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="CRIAR CONTA" />
 
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:indeterminateTint="@color/white"
+                android:visibility="invisible"
+                tools:visibility="visible" />
 
-           <ProgressBar
-               android:id="@+id/progressBar"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_gravity="center"
-               android:layout_marginTop="8dp"
-               android:visibility="invisible"
-               tools:visibility="visible"
-               android:indeterminateTint="@color/white" />
+        </LinearLayout>
 
-       </LinearLayout>
-
-   </LinearLayout>
+    </LinearLayout>
 
 </ScrollView>

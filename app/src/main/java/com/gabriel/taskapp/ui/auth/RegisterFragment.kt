@@ -44,10 +44,10 @@ class RegisterFragment : Fragment() {
             if (password.isNotEmpty()){
                 Toast.makeText(requireContext(), "Tudo certo.", Toast.LENGTH_LONG).show()
             }else{
-                showBottomSheet(message = R.string.email_empty_register_fragment)
+                showBottomSheet(message = getString(R.string.password_empty_register_fragment))
             }
         }else{
-            showBottomSheet(message = R.string.password_empty_register_fragment)
+            showBottomSheet(message = getString(R.string.email_empty_register_fragment))
         }
     }
     override fun onDestroy() {
