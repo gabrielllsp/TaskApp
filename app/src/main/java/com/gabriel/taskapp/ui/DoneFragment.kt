@@ -29,18 +29,22 @@ class DoneFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRecyclerView(getTasks())
+        initRecyclerView()
+        getTasks()
     }
 
-    private fun initRecyclerView(taskList: List<Task>) {
-        taskAdapter = TaskAdapter(requireContext(), taskList) { task, option ->
+    private fun initRecyclerView() {
+        taskAdapter = TaskAdapter(requireContext()) { task, option ->
             optionSelected(task, option)
         }
 
-        binding.rvTasks.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvTasks.setHasFixedSize(true)
-        binding.rvTasks.adapter = taskAdapter
+        with(binding.rvTasks) {
+            layoutManager = LinearLayoutManager(requireContext())
+            setHasFixedSize(true)
+            adapter = taskAdapter
+        }
     }
+
 
     private fun optionSelected(task: Task, option: Int) {
         when (option) {
@@ -66,13 +70,16 @@ class DoneFragment : Fragment() {
         }
     }
 
-    private fun getTasks() = listOf(
-        Task("0", "Criar nova tela de login", Status.DONE),
-        Task("1", "Validar informações na tela de login", Status.DONE),
-        Task("2", "Adicionar nova funcionalidade no app", Status.DONE),
-        Task("3", "salvar token no localmente", Status.DONE),
-        Task("4", "Criar funcionalidade de logout no app", Status.DONE)
-    )
+    private fun getTasks() {
+        val taskList = listOf(
+            Task("0", "Criar nova tela de login", Status.DONE),
+            Task("1", "Validar informações na tela de login", Status.DONE),
+            Task("2", "Adicionar nova funcionalidade no app", Status.DONE),
+            Task("3", "salvar token no localmente", Status.DONE),
+            Task("4", "Criar funcionalidade de logout no app", Status.DONE)
+        )
+        taskAdapter.submitList(taskList)
+    }
 
     override fun onDestroy() {
         super.onDestroy()
