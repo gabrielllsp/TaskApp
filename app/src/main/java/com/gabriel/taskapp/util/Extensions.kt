@@ -2,22 +2,21 @@ package com.gabriel.taskapp.util
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import com.gabriel.taskapp.R
 import com.gabriel.taskapp.databinding.BottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
-fun Fragment.initToolbar(toolbar:Toolbar){
+fun androidx.fragment.app.Fragment.initToolbar(toolbar:Toolbar){
     (activity as AppCompatActivity).setSupportActionBar(toolbar)
     (activity as AppCompatActivity).title = ""
     (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
     toolbar.setNavigationOnClickListener { activity?.onBackPressedDispatcher?.onBackPressed() }
 }
 
-fun Fragment.showBottomSheet(
+fun androidx.fragment.app.Fragment.showBottomSheet(
     titleDialog: Int? = null,
-    titleBottom: Int? = null,
     message: String,
+    titleButton: Int? = null,
     onClick: () -> Unit = {}
 ){
     val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.bottomSheetDialog)
@@ -26,7 +25,7 @@ fun Fragment.showBottomSheet(
 
     binding.txtTitle.text = getText(titleDialog ?: R.string.text_title_warning)
     binding.txtMessage.text = message
-    binding.btnOk.text = getText(titleDialog ?: R.string.text_button_warning)
+    binding.btnOk.text = getText( titleButton?: R.string.text_button_warning)
     binding.btnOk.setOnClickListener {
         onClick()
         bottomSheetDialog.dismiss()
