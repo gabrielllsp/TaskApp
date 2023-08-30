@@ -14,6 +14,7 @@ import com.gabriel.taskapp.data.model.Status
 import com.gabriel.taskapp.data.model.Task
 import com.gabriel.taskapp.databinding.FragmentTodoBinding
 import com.gabriel.taskapp.ui.adapter.TaskAdapter
+import com.gabriel.taskapp.util.showBottomSheet
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -72,8 +73,14 @@ class TodoFragment : Fragment() {
     private fun optionSelected(task: Task, option: Int) {
         when (option) {
             TaskAdapter.SELECT_REMOVE -> {
-                Toast.makeText(requireContext(), "Removendo ${task.description}", Toast.LENGTH_LONG)
-                    .show()
+                showBottomSheet(
+                    titleDialog = R.string.text_title_dialog_delete,
+                    message = getString(R.string.text_message_dialog_delete),
+                    titleButton = R.string.text_button_dialog_confirm,
+                    onClick = {
+                        deleteTask(task)
+                    }
+                )
             }
 
             TaskAdapter.SELECT_EDIT -> {
@@ -108,6 +115,8 @@ class TodoFragment : Fragment() {
                     }
                     binding.progressBar.isVisible = false
                     listEmpty(taskList)
+
+                    taskList.reverse()
                     taskAdapter.submitList(taskList)
                 }
 
@@ -117,6 +126,25 @@ class TodoFragment : Fragment() {
                 }
 
             })
+    }
+
+    private fun deleteTask(task: Task) {
+        reference
+            .child("tasks")
+            .child(auth.currentUser?.uid ?: "")
+            .child(task.id)
+            .removeValue().addOnCompleteListener { result ->
+                if (result.isSuccessful) {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.text_delete_sucess_task,
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(requireContext(), R.string.error_generic, Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
     }
 
     private fun listEmpty(taskList: List<Task>) {
