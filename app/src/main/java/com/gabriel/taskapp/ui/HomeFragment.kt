@@ -19,10 +19,12 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -33,8 +35,23 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = Firebase.auth
+
         initListeners()
         initTabs()
+    }
+
+    private fun initListeners() {
+        binding.btnLogout.setOnClickListener {
+            showBottomSheet(
+                titleButton = R.string.text_button_dialog_confirm,
+                titleDialog = R.string.text_title_dialog_confirm_logout,
+                message = getString(R.string.text_message_dialog_confirm_logout),
+                onClick = {
+                    auth.signOut()
+                    findNavController().navigate(R.id.action_homeFragment_to_authentication)
+                }
+            )
+        }
     }
 
     private fun initTabs() {
@@ -52,21 +69,9 @@ class HomeFragment : Fragment() {
         }.attach()
     }
 
-    private fun initListeners() {
-        binding.btnLogout.setOnClickListener {
-            showBottomSheet(
-                titleDialog = R.string.text_title_dialog_confirm_logout,
-                titleButton = R.string.text_button_dialog_confirm,
-                message = getString(R.string.text_message_dialog_confirm_logout),
-                onClick = {
-                    auth.signOut()
-                    findNavController().navigate(R.id.action_homeFragment_to_authentication)
-                }
-            )
-        }
-    }
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
+
 }

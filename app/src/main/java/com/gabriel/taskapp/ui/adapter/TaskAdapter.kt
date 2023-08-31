@@ -25,7 +25,7 @@ class TaskAdapter(
         val SELECT_DETAILS: Int = 4
         val SELECT_NEXT: Int = 5
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Task>(){
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Task>() {
             override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
                 return oldItem.id == newItem.id && oldItem.description == newItem.description
             }

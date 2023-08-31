@@ -6,30 +6,29 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.gabriel.taskapp.R
 import com.gabriel.taskapp.data.model.Status
 import com.gabriel.taskapp.data.model.Task
 import com.gabriel.taskapp.databinding.FragmentFormTaskBinding
+import com.gabriel.taskapp.util.FirebaseHelper
 import com.gabriel.taskapp.util.initToolbar
 import com.gabriel.taskapp.util.showBottomSheet
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 
-class FormTaskFragment : Fragment() {
+class FormTaskFragment : BaseFragment() {
 
     private var _binding: FragmentFormTaskBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var task: Task
     private var status: Status = Status.TODO
     private var newTask: Boolean = true
-    private lateinit var auth: FirebaseAuth
 
-    private lateinit var reference: DatabaseReference
+    private val args: FormTaskFragmentArgs by navArgs()
+
+    private val viewModel: TaskViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,17 +41,25 @@ class FormTaskFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initToolbar(binding.toolbar)
-        reference = Firebase.database.reference
-        auth = Firebase.auth
+
+        getArgs()
         initListeners()
     }
 
-    private fun initListeners() {
+    private fun getArgs() {
+        args.task.let {
+            if (it != null) {
+                this.task = it
 
-        binding.btnSave.setOnClickListener {
-            validate()
+                configTask()
+            }
         }
-        binding.rgStatus.setOnCheckedChangeListener { _, i ->
+    }
+
+    private fun initListeners() {
+        binding.btnSave.setOnClickListener { validateData() }
+
+        binding.rgStatus.setOnCheckedChangeListener { _, id ->
             status = when (id) {
                 R.id.rbTodo -> Status.TODO
                 R.id.rbDoing -> Status.DOING
@@ -61,17 +68,39 @@ class FormTaskFragment : Fragment() {
         }
     }
 
-    private fun validate() {
+    private fun configTask() {
+        newTask = false
+        status = task.status
+        binding.textToolbar.setText(R.string.text_toolbar_update_form_task_fragment)
+
+        binding.edtDescription.setText(task.description)
+
+        setStatus()
+    }
+
+    private fun setStatus() {
+        binding.rgStatus.check(
+            when (task.status) {
+                Status.TODO -> R.id.rbTodo
+                Status.DOING -> R.id.rbDoing
+                else -> R.id.rbDone
+            }
+        )
+    }
+
+    private fun validateData() {
         val description = binding.edtDescription.text.toString().trim()
 
         if (description.isNotEmpty()) {
 
+            hideKeyboard()
+
             binding.progressBar.isVisible = true
 
             if (newTask) task = Task()
-            task.id = reference.database.reference.push().key ?: ""
             task.description = description
             task.status = status
+
             saveTask()
 
         } else {
@@ -80,21 +109,23 @@ class FormTaskFragment : Fragment() {
     }
 
     private fun saveTask() {
-        reference
+        FirebaseHelper.getDatabase()
             .child("tasks")
-            .child(auth.currentUser?.uid ?: "")
+            .child(FirebaseHelper.getIdUser())
             .child(task.id)
             .setValue(task).addOnCompleteListener { result ->
                 if (result.isSuccessful) {
                     Toast.makeText(
                         requireContext(),
                         R.string.text_save_sucess_form_task_fragment,
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_SHORT
                     ).show()
 
-                    if (newTask) {// Nova Tarefa
+                    if (newTask) { // Nova tarefa
                         findNavController().popBackStack()
-                    } else {//Editando tarefa
+                    } else { // Editando tarefa
+                        viewModel.setUpdateTask(task)
+
                         binding.progressBar.isVisible = false
                     }
 
@@ -105,7 +136,9 @@ class FormTaskFragment : Fragment() {
             }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
+
 }

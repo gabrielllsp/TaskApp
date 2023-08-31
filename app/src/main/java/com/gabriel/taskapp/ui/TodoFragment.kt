@@ -1,12 +1,14 @@
 package com.gabriel.taskapp.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.gabriel.taskapp.R
@@ -14,28 +16,25 @@ import com.gabriel.taskapp.data.model.Status
 import com.gabriel.taskapp.data.model.Task
 import com.gabriel.taskapp.databinding.FragmentTodoBinding
 import com.gabriel.taskapp.ui.adapter.TaskAdapter
+import com.gabriel.taskapp.util.FirebaseHelper
 import com.gabriel.taskapp.util.showBottomSheet
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 
 
 class TodoFragment : Fragment() {
 
     private var _binding: FragmentTodoBinding? = null
     private val binding get() = _binding!!
-    private lateinit var taskAdapter: TaskAdapter
-    private lateinit var auth: FirebaseAuth
-    private lateinit var reference: DatabaseReference
 
+    private lateinit var taskAdapter: TaskAdapter
+
+    private val viewModel: TaskViewModel by activityViewModels()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTodoBinding.inflate(inflater, container, false)
@@ -45,16 +44,44 @@ class TodoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        reference = Firebase.database.reference
-        auth = Firebase.auth
         initListeners()
+
         initRecyclerView()
+
         getTasks()
     }
 
     private fun initListeners() {
         binding.fabAdd.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_formTaskFragment)
+            val action = HomeFragmentDirections
+                .actionHomeFragmentToFormTaskFragment(null)
+            findNavController().navigate(action)
+        }
+
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        viewModel.taskUpdate.observe(viewLifecycleOwner) { updateTask ->
+            if (updateTask.status == Status.TODO) {
+
+                // Armazena a lista atual do adapter
+                val oldList = taskAdapter.currentList
+
+                // Gera uma nova lista a partir da lista antiga já com a tarefa atualizada
+                val newList = oldList.toMutableList().apply {
+                    find { it.id == updateTask.id }?.description = updateTask.description
+                }
+
+                // Armazena a posição da tarefa a ser atualizada na lista
+                val position = newList.indexOfFirst { it.id == updateTask.id }
+
+                // Envia a lista atualizada para o adapter
+                taskAdapter.submitList(newList)
+
+                // Atualiza a tarefa pela posição do adapter
+                taskAdapter.notifyItemChanged(position)
+            }
         }
     }
 
@@ -84,26 +111,27 @@ class TodoFragment : Fragment() {
             }
 
             TaskAdapter.SELECT_EDIT -> {
-                Toast.makeText(requireContext(), "Editando ${task.description}", Toast.LENGTH_LONG)
-                    .show()
+                val action = HomeFragmentDirections
+                    .actionHomeFragmentToFormTaskFragment(task)
+                findNavController().navigate(action)
             }
 
             TaskAdapter.SELECT_DETAILS -> {
-                Toast.makeText(requireContext(), "Detalhes ${task.description}", Toast.LENGTH_LONG)
+                Toast.makeText(requireContext(), "Detalhes ${task.description}", Toast.LENGTH_SHORT)
                     .show()
             }
 
             TaskAdapter.SELECT_NEXT -> {
-                Toast.makeText(requireContext(), "Next ${task.description}", Toast.LENGTH_LONG)
-                    .show()
+                task.status = Status.DOING
+                updateTask(task)
             }
         }
     }
 
     private fun getTasks() {
-        reference
+        FirebaseHelper.getDatabase()
             .child("tasks")
-            .child(auth.currentUser?.uid ?: "")
+            .child(FirebaseHelper.getIdUser())
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val taskList = mutableListOf<Task>()
@@ -113,6 +141,7 @@ class TodoFragment : Fragment() {
                             taskList.add(task)
                         }
                     }
+
                     binding.progressBar.isVisible = false
                     listEmpty(taskList)
 
@@ -121,27 +150,51 @@ class TodoFragment : Fragment() {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(requireContext(), R.string.error_generic, Toast.LENGTH_LONG)
-                        .show()
+                    Log.i("INFOTESTE", "onCancelled:")
                 }
-
             })
     }
 
     private fun deleteTask(task: Task) {
-        reference
+        FirebaseHelper.getDatabase()
             .child("tasks")
-            .child(auth.currentUser?.uid ?: "")
+            .child(FirebaseHelper.getIdUser())
             .child(task.id)
             .removeValue().addOnCompleteListener { result ->
                 if (result.isSuccessful) {
                     Toast.makeText(
                         requireContext(),
                         R.string.text_delete_sucess_task,
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    val oldList = taskAdapter.currentList
+                    val newList = oldList.toMutableList().apply {
+                        remove(task)
+                    }
+                    taskAdapter.submitList(newList)
+
+                } else {
+                    Toast.makeText(requireContext(), R.string.error_generic, Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+    }
+
+    private fun updateTask(task: Task) {
+        FirebaseHelper.getDatabase()
+            .child("tasks")
+            .child(FirebaseHelper.getIdUser())
+            .child(task.id)
+            .setValue(task).addOnCompleteListener { result ->
+                if (result.isSuccessful) {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.text_update_sucess_form_task_fragment,
+                        Toast.LENGTH_SHORT
                     ).show()
                 } else {
-                    Toast.makeText(requireContext(), R.string.error_generic, Toast.LENGTH_LONG)
+                    Toast.makeText(requireContext(), R.string.error_generic, Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -155,8 +208,9 @@ class TodoFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
+
 }
