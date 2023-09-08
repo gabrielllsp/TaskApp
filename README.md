@@ -1,3 +1,3 @@
 # TaskApp-Firebase
 
-Projeto feito com Firebase.
+Projeto TaskApp utilizando o Firebase e Realtime Database.
